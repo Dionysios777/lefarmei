@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lefarmie</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --black:#0a0a0a; --white:#f8f8f8; --gray:#e0e0e0; --mid:#888; }
+  body { background:var(--white); color:var(--black); font-family:'Georgia',serif; }
+
+  header { background:var(--black); color:var(--white); padding:60px 40px 50px; border-bottom:4px solid var(--black); position:relative; }
+  .logo { font-size:3.5rem; font-weight:900; letter-spacing:-2px; font-family:'Arial Black',sans-serif; }
+  .tagline { margin-top:8px; font-size:1rem; letter-spacing:4px; text-transform:uppercase; color:#aaa; font-family:sans-serif; }
+  .hero-sub { margin-top:20px; font-size:1.1rem; color:#ccc; max-width:500px; line-height:1.6; }
+  .header-controls { position:absolute; top:24px; right:32px; display:flex; gap:10px; align-items:center; }
+  .lang-toggle { display:flex; border:1px solid #444; }
+  .lang-btn { padding:8px 16px; background:transparent; color:#aaa; border:none; font-family:sans-serif; font-size:0.8rem; letter-spacing:1px; cursor:pointer; transition:all 0.2s; }
+  .lang-btn.active { background:var(--white); color:var(--black); font-weight:bold; }
+  .admin-link { padding:8px 14px; background:transparent; color:#aaa; border:1px solid #444; font-family:sans-serif; font-size:0.75rem; letter-spacing:1px; cursor:pointer; transition:all 0.2s; }
+  .admin-link:hover { color:var(--white); border-color:#aaa; }
+
+  .nav-strip { display:flex; border-bottom:2px solid var(--black); font-family:sans-serif; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; }
+  .nav-strip span { padding:14px 24px; cursor:pointer; border-right:1px solid var(--gray); transition:background 0.2s; }
+  .nav-strip span:hover, .nav-strip span.active { background:var(--black); color:var(--white); }
+
+  .container { max-width:1100px; margin:0 auto; padding:0 24px; }
+  section { padding:50px 0; }
+  h2 { font-size:2rem; font-family:'Arial Black',sans-serif; letter-spacing:-1px; margin-bottom:30px; border-bottom:2px solid var(--black); padding-bottom:12px; }
+
+  .page { display:none; }
+  .page.active { display:block; }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:2px; background:var(--black); border:2px solid var(--black); }
+  .card { background:var(--white); padding:24px; transition:background 0.2s; }
+  .card:hover { background:#f0f0f0; }
+  .veg-icon { font-size:2.5rem; margin-bottom:10px; }
+  .veg-name { font-size:1.1rem; font-weight:900; font-family:sans-serif; text-transform:uppercase; letter-spacing:1px; }
+  .veg-desc { font-size:0.82rem; color:var(--mid); margin:6px 0 12px; line-height:1.5; }
+  .veg-price { font-size:1rem; font-weight:bold; font-family:sans-serif; margin-bottom:14px; }
+  .qty-ctrl { display:flex; align-items:center; gap:10px; }
+  .qty-btn { width:30px; height:30px; border:2px solid var(--black); background:var(--white); font-size:1.1rem; cursor:pointer; font-weight:bold; transition:all 0.15s; }
+  .qty-btn:hover { background:var(--black); color:var(--white); }
+  .qty-val { font-family:sans-serif; font-weight:bold; font-size:1rem; min-width:20px; text-align:center; }
+
+  .order-panel { background:var(--black); color:var(--white); padding:36px; margin-top:2px; }
+  .order-panel h2 { color:var(--white); border-color:#444; }
+  .order-items { margin-bottom:24px; }
+  .order-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #333; font-family:sans-serif; font-size:0.9rem; }
+  .order-total { display:flex; justify-content:space-between; padding:16px 0 0; font-size:1.2rem; font-weight:900; font-family:sans-serif; }
+  .empty-msg { color:#666; font-family:sans-serif; font-size:0.9rem; }
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:28px; }
+  .form-grid.full { grid-template-columns:1fr; }
+  label { display:block; font-family:sans-serif; font-size:0.75rem; letter-spacing:2px; text-transform:uppercase; color:#aaa; margin-bottom:6px; }
+  input, select, textarea { width:100%; padding:12px 14px; background:#111; color:var(--white); border:1px solid #444; font-size:0.95rem; font-family:sans-serif; outline:none; transition:border 0.2s; }
+  input:focus, select:focus, textarea:focus { border-color:var(--white); }
+  select option { background:#111; }
+  .pickup-section { margin-top:24px; }
+  .time-slots { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
+  .slot { padding:10px; border:1px solid #444; text-align:center; font-family:sans-serif; font-size:0.8rem; cursor:pointer; transition:all 0.2s; color:#aaa; }
+  .slot:hover { border-color:#aaa; color:var(--white); }
+  .slot.selected { background:var(--white); color:var(--black); border-color:var(--white); font-weight:bold; }
+  .submit-btn { margin-top:28px; width:100%; padding:18px; background:var(--white); color:var(--black); border:none; font-size:1rem; font-weight:900; font-family:sans-serif; letter-spacing:3px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+  .submit-btn:hover { background:#ddd; }
+
+  #confirmation { display:none; text-align:center; padding:80px 24px; }
+  .confirm-icon { font-size:4rem; margin-bottom:20px; }
+  .confirm-title { font-size:2.5rem; font-family:'Arial Black',sans-serif; letter-spacing:-1px; margin-bottom:16px; }
+  .confirm-msg { font-size:1.1rem; color:var(--mid); line-height:1.8; max-width:500px; margin:0 auto 30px; }
+  .confirm-details { background:var(--black); color:var(--white); display:inline-block; padding:24px 40px; font-family:sans-serif; }
+  .confirm-details p { margin:6px 0; font-size:0.9rem; }
+  .new-order-btn { margin-top:30px; padding:14px 32px; background:var(--black); color:var(--white); border:none; font-size:0.85rem; font-weight:900; font-family:sans-serif; letter-spacing:3px; text-transform:uppercase; cursor:pointer; }
+
+  .farm-hero { background:var(--black); color:var(--white); padding:60px 40px; margin-bottom:2px; }
+  .farm-hero h1 { font-family:'Arial Black',sans-serif; font-size:2.8rem; letter-spacing:-2px; margin-bottom:16px; }
+  .farm-hero p { color:#ccc; font-size:1.1rem; line-height:1.8; max-width:600px; }
+  .info-blocks { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--black); border:2px solid var(--black); margin-bottom:2px; }
+  .info-block { background:var(--white); padding:36px; }
+  .info-block h3 { font-family:'Arial Black',sans-serif; font-size:1.2rem; letter-spacing:-0.5px; margin-bottom:16px; text-transform:uppercase; }
+  .info-block p, .info-block a { font-family:sans-serif; font-size:0.95rem; line-height:1.9; color:#333; display:block; text-decoration:none; }
+  .info-block a:hover { color:var(--black); text-decoration:underline; }
+  .info-icon { font-size:2rem; margin-bottom:12px; }
+  .social-links { display:flex; flex-direction:column; gap:12px; margin-top:8px; }
+  .social-btn { display:flex; align-items:center; gap:12px; padding:12px 16px; border:2px solid var(--black); font-family:sans-serif; font-size:0.9rem; font-weight:bold; text-decoration:none; color:var(--black); transition:all 0.2s; }
+  .social-btn:hover { background:var(--black); color:var(--white); }
+  .social-icon { font-size:1.3rem; }
+
+  .contact-hero { background:var(--black); color:var(--white); padding:60px 40px; margin-bottom:2px; }
+  .contact-hero h1 { font-family:'Arial Black',sans-serif; font-size:2.8rem; letter-spacing:-2px; margin-bottom:16px; }
+  .contact-hero p { color:#ccc; font-size:1.1rem; line-height:1.8; max-width:500px; }
+  .contact-blocks { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--black); border:2px solid var(--black); }
+  .contact-block { background:var(--white); padding:36px; }
+  .contact-block h3 { font-family:'Arial Black',sans-serif; font-size:1.1rem; text-transform:uppercase; margin-bottom:16px; }
+  .contact-big { font-family:'Arial Black',sans-serif; font-size:2rem; letter-spacing:-1px; margin:8px 0; }
+  .contact-block p, .contact-block a { font-family:sans-serif; font-size:0.95rem; color:#333; line-height:1.8; text-decoration:none; display:block; }
+  .contact-block a:hover { text-decoration:underline; color:var(--black); }
+  .contact-note { font-size:0.82rem; color:var(--mid); margin-top:8px; font-family:sans-serif; }
+
+  #admin-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; overflow-y:auto; }
+  .admin-box { background:var(--white); max-width:750px; margin:40px auto; padding:40px; position:relative; }
+  .admin-box h2 { font-family:'Arial Black',sans-serif; font-size:1.8rem; margin-bottom:6px; border:none; padding:0; }
+  .admin-subtitle { font-family:sans-serif; font-size:0.85rem; color:var(--mid); margin-bottom:28px; }
+  .admin-close { position:absolute; top:20px; right:20px; background:var(--black); color:var(--white); border:none; width:36px; height:36px; font-size:1.2rem; cursor:pointer; }
+  .veg-admin-list { display:flex; flex-direction:column; gap:2px; margin-bottom:28px; }
+  .veg-admin-row { display:grid; grid-template-columns:40px 1fr 1fr 80px 36px; gap:8px; align-items:center; background:#f0f0f0; padding:10px 12px; }
+  .veg-admin-row input { background:white; color:var(--black); border:1px solid #ccc; padding:6px 8px; font-size:0.85rem; }
+  .icon-input { font-size:1.3rem; text-align:center; padding:4px !important; }
+  .del-btn { background:var(--black); color:var(--white); border:none; width:36px; height:36px; font-size:1rem; cursor:pointer; }
+  .del-btn:hover { background:#c00; }
+  .admin-add-row { display:grid; grid-template-columns:40px 1fr 1fr 80px 36px; gap:8px; align-items:end; margin-bottom:20px; }
+  .admin-add-row input { background:white; color:var(--black); border:1px solid #ccc; padding:8px; font-size:0.85rem; }
+  .admin-add-row label { color:var(--black); font-size:0.65rem; }
+  .add-btn { background:var(--black); color:var(--white); border:none; width:36px; height:36px; font-size:1.4rem; cursor:pointer; }
+  .admin-save-btn { width:100%; padding:16px; background:var(--black); color:var(--white); border:none; font-size:0.95rem; font-weight:900; font-family:sans-serif; letter-spacing:3px; text-transform:uppercase; cursor:pointer; }
+  .admin-save-btn:hover { background:#222; }
+  .save-confirm { text-align:center; font-family:sans-serif; font-size:0.85rem; color:green; margin-top:10px; display:none; }
+  #login-box { background:var(--white); max-width:360px; margin:120px auto; padding:40px; text-align:center; }
+  #login-box h2 { font-family:'Arial Black',sans-serif; margin-bottom:8px; border:none; padding:0; }
+  #login-box p { font-family:sans-serif; font-size:0.85rem; color:var(--mid); margin-bottom:24px; }
+  #pw-input { width:100%; padding:12px; border:2px solid var(--black); font-size:1rem; font-family:sans-serif; outline:none; margin-bottom:12px; background:white; color:black; }
+  #login-btn { width:100%; padding:14px; background:var(--black); color:var(--white); border:none; font-family:sans-serif; font-weight:900; letter-spacing:2px; text-transform:uppercase; cursor:pointer; }
+  #login-err { color:red; font-family:sans-serif; font-size:0.8rem; margin-top:8px; display:none; }
+
+  @media(max-width:640px) {
+    .logo { font-size:2.2rem; }
+    .form-grid, .info-blocks, .contact-blocks { grid-template-columns:1fr; }
+    .time-slots { grid-template-columns:repeat(2,1fr); }
+    .header-controls { top:12px; right:12px; }
+    .veg-admin-row, .admin-add-row { grid-template-columns:36px 1fr 80px 32px; }
+    .contact-big { font-size:1.4rem; }
+    .farm-hero h1, .contact-hero h1 { font-size:2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-controls">
+      <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" onclick="setLang('fr')">FR</button>
+      </div>
+      <button class="admin-link" onclick="openAdmin()">&#9881; Admin</button>
+    </div>
+    <div class="logo">Lefarmie.</div>
+    <div class="tagline" id="t-tagline">Farm Fresh &middot; Direct from the Field</div>
+    <div class="hero-sub" id="t-herosub">Select your vegetables, choose a pickup time, and we'll have your order ready at the farm. Pay on arrival.</div>
+  </div>
+</header>
+
+<div class="nav-strip">
+  <span class="active" id="nav-shop" onclick="showPage('shop')">Shop</span>
+  <span id="nav-farm" onclick="showPage('farm')">Our Farm</span>
+  <span id="nav-contact" onclick="showPage('contact')">Contact</span>
+</div>
+
+<!-- SHOP PAGE -->
+<div id="page-shop" class="page active">
+  <div id="main-content">
+    <div class="container">
+      <section>
+        <h2 id="t-harvest">This Week's Harvest</h2>
+        <div class="grid" id="catalog"></div>
+      </section>
+    </div>
+    <div class="order-panel">
+      <div class="container">
+        <h2 id="t-yourorder">Your Order</h2>
+        <div class="order-items" id="order-items"></div>
+        <div class="order-total" id="order-total" style="display:none">
+          <span id="t-total">Total</span><span id="total-price">$0.00</span>
+        </div>
+        <div class="pickup-section">
+          <label id="t-pickupday">Pickup Day</label>
+          <select id="pickup-day">
+            <option value="">&#8212; Select a day &#8212;</option>
+            <option>Monday / Lundi</option><option>Tuesday / Mardi</option>
+            <option>Wednesday / Mercredi</option><option>Thursday / Jeudi</option>
+            <option>Friday / Vendredi</option><option>Saturday / Samedi</option>
+            <option>Sunday / Dimanche</option>
+          </select>
+          <label style="margin-top:18px" id="t-pickuptime">Pickup Time</label>
+          <div class="time-slots">
+            <div class="slot" onclick="selectSlot(this)">8:00 AM</div>
+            <div class="slot" onclick="selectSlot(this)">9:00 AM</div>
+            <div class="slot" onclick="selectSlot(this)">10:00 AM</div>
+            <div class="slot" onclick="selectSlot(this)">11:00 AM</div>
+            <div class="slot" onclick="selectSlot(this)">12:00 PM</div>
+            <div class="slot" onclick="selectSlot(this)">2:00 PM</div>
+            <div class="slot" onclick="selectSlot(this)">3:00 PM</div>
+            <div class="slot" onclick="selectSlot(this)">4:00 PM</div>
+            <div class="slot" onclick="selectSlot(this)">5:00 PM</div>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top:28px">
+          <div><label id="t-fname">First Name</label><input type="text" id="fname" placeholder="Marie"></div>
+          <div><label id="t-lname">Last Name</label><input type="text" id="lname" placeholder="Dupont"></div>
+          <div><label id="t-phone">Phone</label><input type="tel" id="phone" placeholder="+1 514 000 0000"></div>
+          <div><label id="t-email">Email</label><input type="email" id="email" placeholder="marie@email.com"></div>
+        </div>
+        <div class="form-grid full" style="margin-top:0">
+          <div><label id="t-notes">Notes (optional)</label><textarea id="notes" rows="2"></textarea></div>
+        </div>
+        <button class="submit-btn" id="t-submit" onclick="submitOrder()">Place Order &mdash; Pay at the Farm</button>
+      </div>
+    </div>
+  </div>
+  <div id="confirmation" class="container">
+    <div class="confirm-icon">&#127807;</div>
+    <div class="confirm-title" id="t-confirmtitle">See you at the farm!</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-details" id="confirm-details"></div>
+    <br>
+    <button class="new-order-btn" id="t-neworder" onclick="resetOrder()">Place Another Order</button>
+  </div>
+</div>
+
+<!-- OUR FARM PAGE -->
+<div id="page-farm" class="page">
+  <div class="farm-hero">
+    <div class="container">
+      <h1 id="t-farm-title">Our Farm</h1>
+      <p id="t-farm-desc">We grow our vegetables with care, right here in Boisbriand. Come visit us, pick up your order, and see where your food comes from.</p>
+    </div>
+  </div>
+  <div class="container" style="padding-top:2px;padding-bottom:50px;">
+    <div class="info-blocks">
+      <div class="info-block">
+        <div class="info-icon">&#128205;</div>
+        <h3 id="t-address-title">Address</h3>
+        <p>3738 Ch. de la Rivi&egrave;re-Cach&eacute;e</p>
+        <p>Boisbriand, QC, J7E 4H4</p>
+        <br>
+        <a href="https://maps.google.com/?q=3738+ch+de+la+riviere-cachee+boisbriand+qc" target="_blank" style="font-weight:bold;color:var(--black);font-family:sans-serif;font-size:0.85rem;letter-spacing:1px;">&#8599; Open in Google Maps</a>
+      </div>
+      <div class="info-block">
+        <div class="info-icon">&#127760;</div>
+        <h3 id="t-social-title">Follow Us</h3>
+        <div class="social-links">
+          <a class="social-btn" href="https://facebook.com/Lefarmer.ca" target="_blank">
+            <span class="social-icon">&#128216;</span>
+            <span>Facebook &mdash; Lefarmer.ca</span>
+          </a>
+          <a class="social-btn" href="https://instagram.com/Lefarmer.ca" target="_blank">
+            <span class="social-icon">&#128247;</span>
+            <span>Instagram &mdash; @Lefarmer.ca</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT PAGE -->
+<div id="page-contact" class="page">
+  <div class="contact-hero">
+    <div class="container">
+      <h1 id="t-contact-title">Contact</h1>
+      <p id="t-contact-desc">Have a question about your order or our vegetables? Reach out &mdash; we're happy to help.</p>
+    </div>
+  </div>
+  <div class="container" style="padding-top:2px;padding-bottom:50px;">
+    <div class="contact-blocks">
+      <div class="contact-block">
+        <div class="info-icon">&#128222;</div>
+        <h3 id="t-phone-title">Call or Text</h3>
+        <div class="contact-big">514-570-9745</div>
+        <a href="tel:5145709745" style="font-weight:bold;font-family:sans-serif;font-size:0.85rem;letter-spacing:1px;color:var(--black);">&#8599; Tap to Call</a>
+        <p class="contact-note" id="t-contact-note">Contact Lefarmer directly at this number for any questions.</p>
+      </div>
+      <div class="contact-block">
+        <div class="info-icon">&#128336;</div>
+        <h3 id="t-hours-title">Pickup Hours</h3>
+        <p id="t-hours-body">Monday &ndash; Sunday<br>8:00 AM &ndash; 5:00 PM<br><br>Orders must be placed in advance. Payment on arrival at the farm.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN OVERLAY -->
+<div id="admin-overlay">
+  <div id="login-box">
+    <h2>Admin</h2>
+    <p>Enter your password to manage vegetables.</p>
+    <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button id="login-btn" onclick="doLogin()">Enter</button>
+    <div id="login-err">Incorrect password. Try again.</div>
+  </div>
+  <div class="admin-box" id="admin-panel" style="display:none">
+    <button class="admin-close" onclick="closeAdmin()">&#x2715;</button>
+    <h2>&#9881; Manage Vegetables</h2>
+    <p class="admin-subtitle">Edit name (EN / FR), price, and emoji. Changes apply instantly to the shop.</p>
+    <div class="veg-admin-list" id="admin-list"></div>
+    <p style="font-family:sans-serif;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:bold;">Add New Vegetable</p>
+    <div class="admin-add-row">
+      <div><label>Icon</label><input class="icon-input" id="new-icon" placeholder="&#x1F966;" maxlength="2"></div>
+      <div><label>Name EN</label><input id="new-en-name" placeholder="Zucchini"></div>
+      <div><label>Name FR</label><input id="new-fr-name" placeholder="Courgette"></div>
+      <div><label>Price $</label><input id="new-price" type="number" step="0.5" placeholder="4.00"></div>
+      <button class="add-btn" onclick="addVeg()">+</button>
+    </div>
+    <button class="admin-save-btn" onclick="saveAdmin()">Save &amp; Apply Changes</button>
+    <div class="save-confirm" id="save-confirm">&#x2713; Changes saved!</div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PW = 'lefarmie2024';
+
+const translations = {
+  en: {
+    tagline:'Farm Fresh \u00B7 Direct from the Field',
+    herosub:"Select your vegetables, choose a pickup time, and we'll have your order ready at the farm. Pay on arrival.",
+    nav:['Shop','Our Farm','Contact'],
+    harvest:"This Week's Harvest", yourorder:'Your Order', total:'Total',
+    pickupday:'Pickup Day', pickuptime:'Pickup Time',
+    fname:'First Name', lname:'Last Name', phone:'Phone', email:'Email',
+    notes:'Notes (optional)', notesph:'Any special requests...',
+    submit:'Place Order \u2014 Pay at the Farm',
+    confirmtitle:'See you at the farm!',
+    confirmmsg:(n)=>`Thanks, ${n}! Your order has been received. Everything will be fresh and ready at pickup. Payment is due at the farm.`,
+    neworder:'Place Another Order',
+    empty:'No items selected yet \u2014 browse the harvest above.',
+    alertitems:'Please add at least one item.', alertname:'Please enter your name.',
+    alertphone:'Please enter your phone number.', alertday:'Please select a pickup day.',
+    alerttime:'Please select a pickup time.',
+    pickupLabel:'Pickup', dueLabel:'Total due at farm',
+    'farm-title':'Our Farm',
+    'farm-desc':'We grow our vegetables with care, right here in Boisbriand. Come visit us, pick up your order, and see where your food comes from.',
+    'address-title':'Address', 'social-title':'Follow Us',
+    'contact-title':'Contact',
+    'contact-desc':"Have a question about your order or our vegetables? Reach out \u2014 we're happy to help.",
+    'phone-title':'Call or Text',
+    'contact-note':'Contact Lefarmer directly at this number for any questions.',
+    'hours-title':'Pickup Hours',
+    'hours-body':'Monday \u2013 Sunday<br>8:00 AM \u2013 5:00 PM<br><br>Orders must be placed in advance. Payment on arrival at the farm.',
+  },
+  fr: {
+    tagline:'Fra\u00EEcheur du jardin \u00B7 Directement du champ',
+    herosub:"Choisissez vos l\u00E9gumes, s\u00E9lectionnez une heure de cueillette, et votre commande sera pr\u00EAte \u00E0 la ferme. Paiement sur place.",
+    nav:['Boutique','Notre Ferme','Contact'],
+    harvest:'La R\u00E9colte de la Semaine', yourorder:'Votre Commande', total:'Total',
+    pickupday:'Jour de cueillette', pickuptime:'Heure de cueillette',
+    fname:'Pr\u00E9nom', lname:'Nom', phone:'T\u00E9l\u00E9phone', email:'Courriel',
+    notes:'Notes (facultatif)', notesph:'Demandes sp\u00E9ciales...',
+    submit:'Passer la commande \u2014 Payer \u00E0 la ferme',
+    confirmtitle:'\u00C0 bient\u00F4t \u00E0 la ferme\u00A0!',
+    confirmmsg:(n)=>`Merci, ${n}\u00A0! Votre commande a \u00E9t\u00E9 re\u00E7ue. Tout sera frais et pr\u00EAt pour la cueillette. Paiement \u00E0 la ferme.`,
+    neworder:'Passer une autre commande',
+    empty:'Aucun article s\u00E9lectionn\u00E9 \u2014 parcourez la r\u00E9colte ci-dessus.',
+    alertitems:'Veuillez ajouter au moins un article.', alertname:'Veuillez entrer votre nom.',
+    alertphone:'Veuillez entrer votre num\u00E9ro de t\u00E9l\u00E9phone.', alertday:'Veuillez choisir un jour.',
+    alerttime:'Veuillez choisir une heure.',
+    pickupLabel:'Cueillette', dueLabel:'Total \u00E0 payer \u00E0 la ferme',
+    'farm-title':'Notre Ferme',
+    'farm-desc':"Nous cultivons nos l\u00E9gumes avec soin, ici m\u00EAme \u00E0 Boisbriand. Venez nous rendre visite, r\u00E9cup\u00E9rez votre commande et voyez d'o\u00F9 vient votre nourriture.",
+    'address-title':'Adresse', 'social-title':'Suivez-nous',
+    'contact-title':'Contact',
+    'contact-desc':'Une question sur votre commande ou nos l\u00E9gumes\u00A0? \u00C9crivez-nous \u2014 nous serons ravis de vous aider.',
+    'phone-title':'Appelez ou textez',
+    'contact-note':'Contactez Lefarmer directement \u00E0 ce num\u00E9ro pour toute question.',
+    'hours-title':'Heures de cueillette',
+    'hours-body':'Lundi \u2013 Dimanche<br>8\u00A0h\u00A000 \u2013 17\u00A0h\u00A000<br><br>Les commandes doivent \u00EAtre pass\u00E9es \u00E0 l\'avance. Paiement \u00E0 la ferme.',
+  }
+};
+
+let veggies=[
+  {id:1,icon:'\u{1F955}',en:['Carrots','Sweet, crunchy heritage carrots. Bunch of 6.'],fr:['Carottes','Carottes patrimoniales croquantes. Botte de 6.'],price:3.50},
+  {id:2,icon:'\u{1F96C}',en:['Kale','Tender curly kale, freshly cut this morning.'],fr:['Chou Fris\u00E9','Chou kale bouclé tendre, coup\u00E9 ce matin.'],price:4.00},
+  {id:3,icon:'\u{1F345}',en:['Tomatoes','Heirloom mix, vine-ripened. Per kg.'],fr:['Tomates','M\u00E9lange de tomates anciennes, m\u00FBries sur la vigne. Au kg.'],price:6.00},
+  {id:4,icon:'\u{1F952}',en:['Cucumbers','Crisp field cucumbers. Pack of 3.'],fr:['Concombres','Concombres des champs croquants. Paquet de 3.'],price:3.00},
+  {id:5,icon:'\u{1FAD1}',en:['Bell Peppers','Mixed colour sweet peppers. Pack of 4.'],fr:['Poivrons','Poivrons doux color\u00E9s. Paquet de 4.'],price:5.50},
+  {id:6,icon:'\u{1F9C5}',en:['Onions','Yellow onions from the field. Bag of 5.'],fr:['Oignons','Oignons jaunes du champ. Sac de 5.'],price:4.50},
+  {id:7,icon:'\u{1F966}',en:['Broccoli','Large heads, freshly harvested.'],fr:['Brocoli','Grosses t\u00EAtes fra\u00EEchement r\u00E9colt\u00E9es.'],price:4.00},
+  {id:8,icon:'\u{1F33D}',en:['Corn','Sweet summer corn. Per ear.'],fr:['Ma\u00EFs',"Ma\u00EFs sucr\u00E9 d'\u00E9t\u00E9. \u00C0 l'\u00E9pi."],price:1.50},
+  {id:9,icon:'\u{1F957}',en:['Mixed Lettuce','Seasonal salad greens, pre-washed bag.'],fr:['Laitues M\u00E9lang\u00E9es','Verdures de saison, sac pr\u00E9-lav\u00E9.'],price:5.00},
+  {id:10,icon:'\u{1F9C4}',en:['Garlic','Fresh garlic bulbs. Bundle of 3.'],fr:['Ail',"T\u00EAtes d'ail frais. Botte de 3."],price:3.50},
+  {id:11,icon:'\u{1FAD9}',en:['Green Beans','Tender haricots verts. 500g bag.'],fr:['Haricots Verts','Haricots verts tendres. Sac de 500\u00A0g.'],price:4.50},
+  {id:12,icon:'\u{1F954}',en:['Potatoes','Fingerling potatoes, firm and earthy. 1kg.'],fr:['Pommes de Terre','Pommes de terre grelots fermes. 1\u00A0kg.'],price:5.00},
+];
+
+let lang='en', cart={}, selectedSlot='', nextId=13, currentPage='shop';
+
+function showPage(page) {
+  currentPage=page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-strip span').forEach(s=>s.classList.remove('active'));
+  document.getElementById('nav-'+page).classList.add('active');
+}
+
+function setLang(l) {
+  lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent===l.toUpperCase()));
+  const t=translations[l];
+  document.getElementById('t-tagline').textContent=t.tagline;
+  document.getElementById('t-herosub').textContent=t.herosub;
+  document.getElementById('nav-shop').textContent=t.nav[0];
+  document.getElementById('nav-farm').textContent=t.nav[1];
+  document.getElementById('nav-contact').textContent=t.nav[2];
+  const ids=['harvest','yourorder','total','pickupday','pickuptime','fname','lname','phone','email','notes','submit','confirmtitle','neworder',
+    'farm-title','farm-desc','address-title','social-title','contact-title','contact-desc','phone-title','contact-note','hours-title'];
+  ids.forEach(k=>{ const el=document.getElementById('t-'+k); if(el) el.textContent=t[k]; });
+  const hoursEl=document.getElementById('t-hours-body');
+  if(hoursEl) hoursEl.innerHTML=t['hours-body'];
+  document.getElementById('notes').placeholder=t.notesph;
+  renderCatalog(); renderOrder();
+}
+
+function renderCatalog() {
+  document.getElementById('catalog').innerHTML=veggies.map(v=>`
+    <div class="card">
+      <div class="veg-icon">${v.icon}</div>
+      <div class="veg-name">${v[lang][0]}</div>
+      <div class="veg-desc">${v[lang][1]}</div>
+      <div class="veg-price">$${v.price.toFixed(2)}</div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="updateQty(${v.id},-1)">\u2212</button>
+        <span class="qty-val" id="qty-${v.id}">${cart[v.id]||0}</span>
+        <button class="qty-btn" onclick="updateQty(${v.id},+1)">+</button>
+      </div>
+    </div>`).join('');
+}
+
+function updateQty(id,delta) {
+  cart[id]=Math.max(0,(cart[id]||0)+delta);
+  if(!cart[id]) delete cart[id];
+  const el=document.getElementById(`qty-${id}`);
+  if(el) el.textContent=cart[id]||0;
+  renderOrder();
+}
+
+function renderOrder() {
+  const t=translations[lang], el=document.getElementById('order-items'), tot=document.getElementById('order-total');
+  const keys=Object.keys(cart);
+  if(!keys.length){el.innerHTML=`<div class="empty-msg">${t.empty}</div>`;tot.style.display='none';return;}
+  let total=0;
+  el.innerHTML=keys.map(id=>{
+    const v=veggies.find(x=>x.id==id),sub=v.price*cart[id];total+=sub;
+    return `<div class="order-row"><span>${v.icon} ${v[lang][0]} \u00D7 ${cart[id]}</span><span>$${sub.toFixed(2)}</span></div>`;
+  }).join('');
+  document.getElementById('total-price').textContent='$'+total.toFixed(2);
+  tot.style.display='flex';
+}
+
+function selectSlot(el) {
+  document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected'); selectedSlot=el.textContent;
+}
+
+function submitOrder() {
+  const t=translations[lang];
+  const fname=document.getElementById('fname').value.trim();
+  const lname=document.getElementById('lname').value.trim();
+  const phone=document.getElementById('phone').value.trim();
+  const day=document.getElementById('pickup-day').value;
+  if(!Object.keys(cart).length){alert(t.alertitems);return;}
+  if(!fname||!lname){alert(t.alertname);return;}
+  if(!phone){alert(t.alertphone);return;}
+  if(!day){alert(t.alertday);return;}
+  if(!selectedSlot){alert(t.alerttime);return;}
+  const items=Object.keys(cart).map(id=>{const v=veggies.find(x=>x.id==id);return `${v.icon} ${v[lang][0]} \u00D7 ${cart[id]}`;}).join('<br>');
+  const total=Object.keys(cart).reduce((s,id)=>s+veggies.find(x=>x.id==id).price*cart[id],0);
+  document.getElementById('confirm-msg').textContent=t.confirmmsg(fname);
+  document.getElementById('confirm-details').innerHTML=`<strong>${fname} ${lname}</strong><br><br><p>\u{1F4E6} ${items}</p><br><p>\u{1F4B0} ${t.dueLabel}: <strong>$${total.toFixed(2)}</strong></p><br><p>\u{1F4C5} ${t.pickupLabel}: <strong>${day} \u2014 ${selectedSlot}</strong></p><p>\u{1F4DE} ${phone}</p>`;
+  document.getElementById('main-content').style.display='none';
+  document.getElementById('confirmation').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function resetOrder() {
+  cart={}; selectedSlot='';
+  document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+  ['pickup-day','fname','lname','phone','email','notes'].forEach(id=>document.getElementById(id).value='');
+  renderCatalog(); renderOrder();
+  document.getElementById('confirmation').style.display='none';
+  document.getElementById('main-content').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function openAdmin() {
+  document.getElementById('admin-overlay').style.display='block';
+  document.getElementById('login-box').style.display='block';
+  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('pw-input').value='';
+  document.getElementById('login-err').style.display='none';
+}
+function closeAdmin() { document.getElementById('admin-overlay').style.display='none'; }
+function doLogin() {
+  if(document.getElementById('pw-input').value===ADMIN_PW){
+    document.getElementById('login-box').style.display='none';
+    document.getElementById('admin-panel').style.display='block';
+    renderAdminList();
+  } else { document.getElementById('login-err').style.display='block'; }
+}
+function renderAdminList() {
+  document.getElementById('admin-list').innerHTML=veggies.map(v=>`
+    <div class="veg-admin-row" id="arow-${v.id}">
+      <input class="icon-input" value="${v.icon}" maxlength="2" id="a-icon-${v.id}">
+      <input value="${v.en[0]}" id="a-en-${v.id}" placeholder="Name EN">
+      <input value="${v.fr[0]}" id="a-fr-${v.id}" placeholder="Name FR">
+      <input type="number" value="${v.price.toFixed(2)}" step="0.5" id="a-price-${v.id}">
+      <button class="del-btn" onclick="deleteVeg(${v.id})">\u2715</button>
+    </div>`).join('');
+}
+function deleteVeg(id) {
+  if(!confirm('Remove this vegetable?')) return;
+  veggies=veggies.filter(v=>v.id!==id); delete cart[id]; renderAdminList();
+}
+function addVeg() {
+  const icon=document.getElementById('new-icon').value.trim()||'\u{1F33F}';
+  const enName=document.getElementById('new-en-name').value.trim();
+  const frName=document.getElementById('new-fr-name').value.trim();
+  const price=parseFloat(document.getElementById('new-price').value);
+  if(!enName){alert('Please enter a name in English.');return;}
+  if(isNaN(price)||price<=0){alert('Please enter a valid price.');return;}
+  veggies.push({id:nextId++,icon,en:[enName,''],fr:[frName||enName,''],price});
+  ['new-icon','new-en-name','new-fr-name','new-price'].forEach(id=>document.getElementById(id).value='');
+  renderAdminList();
+}
+function saveAdmin() {
+  veggies=veggies.map(v=>({...v,
+    icon:document.getElementById(`a-icon-${v.id}`)?.value.trim()||v.icon,
+    en:[document.getElementById(`a-en-${v.id}`)?.value.trim()||v.en[0],v.en[1]],
+    fr:[document.getElementById(`a-fr-${v.id}`)?.value.trim()||v.fr[0],v.fr[1]],
+    price:parseFloat(document.getElementById(`a-price-${v.id}`)?.value)||v.price,
+  }));
+  renderCatalog(); renderOrder();
+  const sc=document.getElementById('save-confirm');
+  sc.style.display='block';
+  setTimeout(()=>{sc.style.display='none';closeAdmin();},1500);
+}
+
+renderCatalog(); renderOrder();
+</script>
+</body>
+</html>
