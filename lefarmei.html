@@ -309,6 +309,20 @@ Copy
 <script>
 const ADMIN_PW = 'lefarmie2024';
 
+function saveVeggies() {
+  localStorage.setItem('lefarmei_veggies', JSON.stringify(veggies));
+}
+function loadVeggies() {
+  const saved = localStorage.getItem('lefarmei_veggies');
+  if(saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if(parsed && parsed.length) veggies = parsed;
+    } catch(e) {}
+  }
+}
+loadVeggies();
+
 const translations = {
   en: {
     tagline:'Farm Fresh \u00B7 Direct from the Field',
@@ -420,8 +434,8 @@ function renderCatalog() {
       <div class="veg-icon">${v.icon}</div>
       <div class="veg-name">${v[lang][0]}</div>
       <div class="veg-desc">${v[lang][1]}</div>
-      <div class="veg-price">${outOfStock ? '<span class="out-of-stock">'+t.outofstock+'</span>' : '$'+v.price.toFixed(2)}</div>
-      <div class="qty-ctrl${outOfStock ? ' disabled' : ''}">
+      <div class="veg-price">${outOfStock ? '<span style="color:#c00;font-family:sans-serif;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;font-weight:900;">Out of Stock</span>' : '$'+v.price.toFixed(2)}</div>
+      <div class="qty-ctrl" style="${outOfStock ? 'opacity:0.3;pointer-events:none;' : ''}">
         <button class="qty-btn" onclick="updateQty(${v.id},-1)">\u2212</button>
         <span class="qty-val" id="qty-${v.id}">${cart[v.id]||0}</span>
         <button class="qty-btn" onclick="updateQty(${v.id},+1)">+</button>
@@ -515,7 +529,7 @@ function renderAdminList() {
 }
 function deleteVeg(id) {
   if(!confirm('Remove this vegetable?')) return;
-  veggies=veggies.filter(v=>v.id!==id); delete cart[id]; renderAdminList();
+  veggies=veggies.filter(v=>v.id!==id); delete cart[id]; saveVeggies(); renderAdminList();
 }
 function addVeg() {
   const icon=document.getElementById('new-icon').value.trim()||'\u{1F33F}';
@@ -525,6 +539,7 @@ function addVeg() {
   if(!enName){alert('Please enter a name in English.');return;}
   if(isNaN(price)||price<0){alert('Please enter a valid price.');return;}
   veggies.push({id:nextId++,icon,en:[enName,''],fr:[frName||enName,''],price});
+  saveVeggies();
   ['new-icon','new-en-name','new-fr-name','new-price'].forEach(id=>document.getElementById(id).value='');
   renderAdminList();
 }
@@ -535,6 +550,7 @@ function saveAdmin() {
     fr:[document.getElementById(`a-fr-${v.id}`)?.value.trim()||v.fr[0],v.fr[1]],
     price:parseFloat(document.getElementById(`a-price-${v.id}`)?.value)||0,
   }));
+  saveVeggies();
   renderCatalog(); renderOrder();
   const sc=document.getElementById('save-confirm');
   sc.style.display='block';
