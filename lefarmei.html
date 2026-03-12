@@ -107,12 +107,12 @@ Copy
   .admin-subtitle { font-family:sans-serif; font-size:0.85rem; color:var(--mid); margin-bottom:28px; }
   .admin-close { position:absolute; top:20px; right:20px; background:var(--black); color:var(--white); border:none; width:36px; height:36px; font-size:1.2rem; cursor:pointer; }
   .veg-admin-list { display:flex; flex-direction:column; gap:2px; margin-bottom:28px; }
-  .veg-admin-row { display:grid; grid-template-columns:40px 1fr 1fr 80px 36px; gap:8px; align-items:center; background:#f0f0f0; padding:10px 12px; }
+  .veg-admin-row { display:grid; grid-template-columns:40px 1fr 1fr 80px 80px 36px; gap:8px; align-items:center; background:#f0f0f0; padding:10px 12px; }
   .veg-admin-row input { background:white; color:var(--black); border:1px solid #ccc; padding:6px 8px; font-size:0.85rem; }
   .icon-input { font-size:1.3rem; text-align:center; padding:4px !important; }
   .del-btn { background:var(--black); color:var(--white); border:none; width:36px; height:36px; font-size:1rem; cursor:pointer; }
   .del-btn:hover { background:#c00; }
-  .admin-add-row { display:grid; grid-template-columns:40px 1fr 1fr 80px 36px; gap:8px; align-items:end; margin-bottom:20px; }
+  .admin-add-row { display:grid; grid-template-columns:40px 1fr 1fr 80px 80px 36px; gap:8px; align-items:end; margin-bottom:20px; }
   .admin-add-row input { background:white; color:var(--black); border:1px solid #ccc; padding:8px; font-size:0.85rem; }
   .admin-add-row label { color:var(--black); font-size:0.65rem; }
   .add-btn { background:var(--black); color:var(--white); border:none; width:36px; height:36px; font-size:1.4rem; cursor:pointer; }
@@ -131,7 +131,7 @@ Copy
     .form-grid, .info-blocks, .contact-blocks { grid-template-columns:1fr; }
     .time-slots { grid-template-columns:repeat(2,1fr); }
     .header-controls { top:12px; right:12px; }
-    .veg-admin-row, .admin-add-row { grid-template-columns:36px 1fr 80px 32px; }
+    .veg-admin-row, .admin-add-row { grid-template-columns:36px 1fr 80px 80px 32px; }
     .contact-big { font-size:1.4rem; }
     .farm-hero h1, .contact-hero h1 { font-size:2rem; }
   }
@@ -295,6 +295,9 @@ Copy
     <button class="admin-close" onclick="closeAdmin()">&#x2715;</button>
     <h2>&#9881; Manage Vegetables</h2>
     <p class="admin-subtitle">Edit name (EN / FR), price, and emoji. Set price to 0 to mark as Out of Stock. Changes apply instantly.</p>
+    <div style="display:grid;grid-template-columns:40px 1fr 1fr 80px 80px 36px;gap:8px;padding:0 12px 6px;font-family:sans-serif;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;font-weight:bold;color:var(--mid);">
+      <span>Icon</span><span>Name EN</span><span>Name FR</span><span>Price $</span><span>Qty</span><span></span>
+    </div>
     <div class="veg-admin-list" id="admin-list"></div>
     <p style="font-family:sans-serif;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:bold;">Add New Vegetable</p>
     <div class="admin-add-row">
@@ -302,6 +305,7 @@ Copy
       <div><label>Name EN</label><input id="new-en-name" placeholder="Zucchini"></div>
       <div><label>Name FR</label><input id="new-fr-name" placeholder="Courgette"></div>
       <div><label>Price $</label><input id="new-price" type="number" step="0.5" placeholder="4.00"></div>
+      <div><label>Qty</label><input id="new-qty" type="number" step="1" min="0" placeholder="10"></div>
       <button class="add-btn" onclick="addVeg()">+</button>
     </div>
     <button class="admin-save-btn" onclick="saveAdmin()">Save &amp; Apply Changes</button>
@@ -386,18 +390,18 @@ const translations = {
 };
 
 let veggies=[
-  {id:1,icon:'\u{1F955}',en:['Carrots','Sweet, crunchy heritage carrots. Bunch of 6.'],fr:['Carottes','Carottes patrimoniales croquantes. Botte de 6.'],price:3.50},
-  {id:2,icon:'\u{1F96C}',en:['Kale','Tender curly kale, freshly cut this morning.'],fr:['Chou Fris\u00E9','Chou kale bouclé tendre, coup\u00E9 ce matin.'],price:4.00},
-  {id:3,icon:'\u{1F345}',en:['Tomatoes','Heirloom mix, vine-ripened. Per kg.'],fr:['Tomates','M\u00E9lange de tomates anciennes, m\u00FBries sur la vigne. Au kg.'],price:6.00},
-  {id:4,icon:'\u{1F952}',en:['Cucumbers','Crisp field cucumbers. Pack of 3.'],fr:['Concombres','Concombres des champs croquants. Paquet de 3.'],price:3.00},
-  {id:5,icon:'\u{1FAD1}',en:['Bell Peppers','Mixed colour sweet peppers. Pack of 4.'],fr:['Poivrons','Poivrons doux color\u00E9s. Paquet de 4.'],price:5.50},
-  {id:6,icon:'\u{1F9C5}',en:['Onions','Yellow onions from the field. Bag of 5.'],fr:['Oignons','Oignons jaunes du champ. Sac de 5.'],price:4.50},
-  {id:7,icon:'\u{1F966}',en:['Broccoli','Large heads, freshly harvested.'],fr:['Brocoli','Grosses t\u00EAtes fra\u00EEchement r\u00E9colt\u00E9es.'],price:4.00},
-  {id:8,icon:'\u{1F33D}',en:['Corn','Sweet summer corn. Per ear.'],fr:['Ma\u00EFs',"Ma\u00EFs sucr\u00E9 d'\u00E9t\u00E9. \u00C0 l'\u00E9pi."],price:1.50},
-  {id:9,icon:'\u{1F957}',en:['Mixed Lettuce','Seasonal salad greens, pre-washed bag.'],fr:['Laitues M\u00E9lang\u00E9es','Verdures de saison, sac pr\u00E9-lav\u00E9.'],price:5.00},
-  {id:10,icon:'\u{1F9C4}',en:['Garlic','Fresh garlic bulbs. Bundle of 3.'],fr:['Ail',"T\u00EAtes d'ail frais. Botte de 3."],price:3.50},
-  {id:11,icon:'\u{1FAD9}',en:['Green Beans','Tender haricots verts. 500g bag.'],fr:['Haricots Verts','Haricots verts tendres. Sac de 500\u00A0g.'],price:4.50},
-  {id:12,icon:'\u{1F954}',en:['Potatoes','Fingerling potatoes, firm and earthy. 1kg.'],fr:['Pommes de Terre','Pommes de terre grelots fermes. 1\u00A0kg.'],price:5.00},
+  {id:1,icon:'\u{1F955}',en:['Carrots','Sweet, crunchy heritage carrots. Bunch of 6.'],fr:['Carottes','Carottes patrimoniales croquantes. Botte de 6.'],price:3.50,qty:0},
+  {id:2,icon:'\u{1F96C}',en:['Kale','Tender curly kale, freshly cut this morning.'],fr:['Chou Fris\u00E9','Chou kale bouclé tendre, coup\u00E9 ce matin.'],price:4.00,qty:0},
+  {id:3,icon:'\u{1F345}',en:['Tomatoes','Heirloom mix, vine-ripened. Per kg.'],fr:['Tomates','M\u00E9lange de tomates anciennes, m\u00FBries sur la vigne. Au kg.'],price:6.00,qty:0},
+  {id:4,icon:'\u{1F952}',en:['Cucumbers','Crisp field cucumbers. Pack of 3.'],fr:['Concombres','Concombres des champs croquants. Paquet de 3.'],price:3.00,qty:0},
+  {id:5,icon:'\u{1FAD1}',en:['Bell Peppers','Mixed colour sweet peppers. Pack of 4.'],fr:['Poivrons','Poivrons doux color\u00E9s. Paquet de 4.'],price:5.50,qty:0},
+  {id:6,icon:'\u{1F9C5}',en:['Onions','Yellow onions from the field. Bag of 5.'],fr:['Oignons','Oignons jaunes du champ. Sac de 5.'],price:4.50,qty:0},
+  {id:7,icon:'\u{1F966}',en:['Broccoli','Large heads, freshly harvested.'],fr:['Brocoli','Grosses t\u00EAtes fra\u00EEchement r\u00E9colt\u00E9es.'],price:4.00,qty:0},
+  {id:8,icon:'\u{1F33D}',en:['Corn','Sweet summer corn. Per ear.'],fr:['Ma\u00EFs',"Ma\u00EFs sucr\u00E9 d'\u00E9t\u00E9. \u00C0 l'\u00E9pi."],price:1.50,qty:0},
+  {id:9,icon:'\u{1F957}',en:['Mixed Lettuce','Seasonal salad greens, pre-washed bag.'],fr:['Laitues M\u00E9lang\u00E9es','Verdures de saison, sac pr\u00E9-lav\u00E9.'],price:5.00,qty:0},
+  {id:10,icon:'\u{1F9C4}',en:['Garlic','Fresh garlic bulbs. Bundle of 3.'],fr:['Ail',"T\u00EAtes d'ail frais. Botte de 3."],price:3.50,qty:0},
+  {id:11,icon:'\u{1FAD9}',en:['Green Beans','Tender haricots verts. 500g bag.'],fr:['Haricots Verts','Haricots verts tendres. Sac de 500\u00A0g.'],price:4.50,qty:0},
+  {id:12,icon:'\u{1F954}',en:['Potatoes','Fingerling potatoes, firm and earthy. 1kg.'],fr:['Pommes de Terre','Pommes de terre grelots fermes. 1\u00A0kg.'],price:5.00,qty:0},
 ];
 
 let lang='en', cart={}, selectedSlot='', nextId=13, currentPage='shop';
@@ -438,11 +442,6 @@ function renderCatalog() {
       <div class="veg-name">${v[lang][0]}</div>
       <div class="veg-desc">${v[lang][1]}</div>
       <div class="veg-price">${outOfStock ? '<span style="color:#c00;font-family:sans-serif;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;font-weight:900;">Out of Stock</span>' : '$'+v.price.toFixed(2)}</div>
-      <div class="qty-ctrl" style="${outOfStock ? 'opacity:0.3;pointer-events:none;' : ''}">
-        <button class="qty-btn" onclick="updateQty(${v.id},-1)">\u2212</button>
-        <span class="qty-val" id="qty-${v.id}">${cart[v.id]||0}</span>
-        <button class="qty-btn" onclick="updateQty(${v.id},+1)">+</button>
-      </div>
     </div>`;
   }).join('');
 }
@@ -527,6 +526,7 @@ function renderAdminList() {
       <input value="${v.en[0]}" id="a-en-${v.id}" placeholder="Name EN">
       <input value="${v.fr[0]}" id="a-fr-${v.id}" placeholder="Name FR">
       <input type="number" value="${v.price.toFixed(2)}" step="0.5" min="0" id="a-price-${v.id}" title="Set to 0 for Out of Stock">
+      <input type="number" value="${v.qty||0}" step="1" min="0" id="a-qty-${v.id}" title="Available quantity">
       <button class="del-btn" onclick="deleteVeg(${v.id})">\u2715</button>
     </div>`).join('');
 }
@@ -541,9 +541,10 @@ function addVeg() {
   const price=parseFloat(document.getElementById('new-price').value);
   if(!enName){alert('Please enter a name in English.');return;}
   if(isNaN(price)||price<0){alert('Please enter a valid price.');return;}
-  veggies.push({id:nextId++,icon,en:[enName,''],fr:[frName||enName,''],price});
+  const qty = parseInt(document.getElementById('new-qty').value)||0;
+  veggies.push({id:nextId++,icon,en:[enName,''],fr:[frName||enName,''],price,qty});
   saveVeggies();
-  ['new-icon','new-en-name','new-fr-name','new-price'].forEach(id=>document.getElementById(id).value='');
+  ['new-icon','new-en-name','new-fr-name','new-price','new-qty'].forEach(id=>document.getElementById(id).value='');
   renderAdminList();
 }
 function saveAdmin() {
@@ -552,6 +553,7 @@ function saveAdmin() {
     en:[document.getElementById(`a-en-${v.id}`)?.value.trim()||v.en[0],v.en[1]],
     fr:[document.getElementById(`a-fr-${v.id}`)?.value.trim()||v.fr[0],v.fr[1]],
     price:parseFloat(document.getElementById(`a-price-${v.id}`)?.value)||0,
+    qty: parseInt(document.getElementById(`a-qty-${v.id}`)?.value)||0,
   }));
   saveVeggies();
   renderCatalog(); renderOrder();
